@@ -13,6 +13,7 @@ const (
 
 var (
 	stack = InitStack(100)
+	queue = InitQueue(3)
 )
 
 // Queue
@@ -31,16 +32,59 @@ func InitQueue(size int) *Queue {
 	q.store = make([]*Vertex, size)
 	return q
 }
+func (q *Queue) empty() bool {
+	if q.tail == q.head {
+		return true
+	}
+	return false
+}
 
-//func (q *Queue) In(e *Vertex) {
-//
-//}
-//func (q *Queue) Out() *Vertex {
-//	//if q.head
-//	e := q.store[q.head]
-//	q.head = (q.head + 1) % q.size
-//	return e
-//}
+// 队列实际可用空间为q.size-1,因为使用了一个空间判断队列满
+func (q *Queue) full() bool {
+	if (q.tail+1)%q.size == q.head {
+		return true
+	}
+	return false
+}
+
+func (q *Queue) In(e *Vertex) {
+	if q.full() {
+		fmt.Println("queue is full")
+		return
+	}
+	q.store[q.tail] = e
+	q.tail = (q.tail + 1) % q.size
+	//fmt.Printf("in queue now queue's head is : %d, tail is %d \n", q.head, q.tail)
+}
+
+func (q *Queue) Out() *Vertex {
+	if q.empty() {
+		fmt.Println("queue is empty")
+		return nil
+	}
+	tmp := q.store[q.head]
+	q.head = (q.head + 1) % q.size
+	//fmt.Printf("out queue now queue's head is : %d, tail is %d \n", q.head, q.tail)
+	return tmp
+}
+func Test_Queue(t *testing.T) {
+	q := InitQueue(3)
+	q.In(&Vertex{
+		data:    "1",
+		fTime:   0,
+		dTime:   0,
+		visited: false,
+	})
+	q.In(&Vertex{
+		data:    "2",
+		fTime:   0,
+		dTime:   0,
+		visited: false,
+	})
+	fmt.Println(q.Out())
+	fmt.Println(q.Out())
+}
+
 // Stack
 type Stack struct {
 	top   int
@@ -152,7 +196,8 @@ func (g *Graph) AddArc(m, n *Vertex) {
 	}
 }
 func (g *Graph) DFS(e *Vertex) {
-	stack.Put(e)
+	//stack.Put(e)
+	queue.In(e)
 	//for start, value := range g.vertex {
 	//
 	//}
@@ -173,8 +218,11 @@ func (g *Graph) DFS(e *Vertex) {
 				}
 			}
 			//}
-			for stack.top != 0 {
-				fmt.Printf(" <- %v", stack.Pop().data)
+			//for stack.top != 0 {
+			//	fmt.Printf(" <- %v", stack.Pop().data)
+			//}
+			for !queue.empty() {
+				fmt.Printf("%v -> ", queue.Out().data)
 			}
 			println()
 		}
@@ -203,7 +251,7 @@ func Test_resource(t *testing.T) {
 	//g.AddArc(&Vertex{data: "2"}, &Vertex{data: "8"})
 
 	g.String()
-	g.DFS(&Vertex{data: "7"})
+	g.DFS(&Vertex{data: "2"})
 	//s := InitStack(10)
 	//for i := 0; i < 10; i++ {
 	//	s.Put(&Vertex{strconv.Itoa(i)})
