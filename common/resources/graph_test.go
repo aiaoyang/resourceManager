@@ -5,6 +5,67 @@ import (
 	"testing"
 )
 
+var (
+	//stack = InitStack(100)
+	queue = InitQueue(200)
+)
+
+// Queue
+type Queue struct {
+	head  int
+	tail  int
+	size  int
+	store []*Vertex
+}
+
+func InitQueue(size int) *Queue {
+	q := &Queue{}
+	q.head = 0
+	q.tail = 0
+	q.size = size
+	q.store = make([]*Vertex, size)
+	return q
+}
+func (q *Queue) empty() bool {
+	if q.tail == q.head {
+		return true
+	}
+	return false
+}
+
+// 队列实际可用空间为q.size-1,因为使用了一个空间判断队列满
+func (q *Queue) full() bool {
+	if (q.tail+1)%q.size == q.head {
+		return true
+	}
+	return false
+}
+
+func (q *Queue) In(e *Vertex) {
+	if q.full() {
+		fmt.Println("queue is full")
+		return
+	}
+	q.store[q.tail] = e
+	q.tail = (q.tail + 1) % q.size
+	//fmt.Printf("in queue now queue's head is : %d, tail is %d \n", q.head, q.tail)
+}
+
+func (q *Queue) Out() *Vertex {
+	if q.empty() {
+		fmt.Println("queue is empty")
+		return nil
+	}
+	tmp := q.store[q.head]
+	q.head = (q.head + 1) % q.size
+	//fmt.Printf("out queue now queue's head is : %d, tail is %d \n", q.head, q.tail)
+	return tmp
+}
+
+var (
+	clock = 0
+)
+
 type ArcStatus int
 type VexStatus int
 
@@ -47,25 +108,28 @@ func InitGraph(nodeNum int) *Graph {
 		arcs:    arcs,
 	}
 }
-func DFS(g *Graph, vertexIndex int, clock int) {
-	fmt.Printf("now start index %d dfs \n", vertexIndex)
+func DFS(g *Graph, vertexIndex int) {
+	//clock := clockIn
+	g.vertexs[vertexIndex].status = discovered
+	//fmt.Printf("now start index %d dfs , clock is %d\n", vertexIndex, clock)
 	queue.In(g.vertexs[vertexIndex])
 	clock++
+	//fmt.Println(clock)
 	g.vertexs[vertexIndex].discoverTime = clock
 	//寻找所有当前节点的邻居节点,如果邻居节点都已访问,则此节点标记为visited
 	for nbrIndex, nbrStat := range g.arcs[vertexIndex] {
 		// 找到邻居节点
 		if nbrStat != nil {
-			fmt.Printf("nbr index not null %d\n", nbrIndex)
+			//fmt.Printf("nbr index not null %d\n", nbrIndex)
 			// 判断邻居节点状态
 			switch g.vertexs[nbrIndex].status {
 			case discovered:
 				// 如果是已发现状态,标记弧为环路
 				g.arcs[vertexIndex][nbrIndex].status = backward
-				fmt.Printf("discovered")
+				//fmt.Printf("discovered")
 			case undiscovered:
 				// 如果邻居节点是未发现的状态，标记弧为tree
-				DFS(g, nbrIndex, clock)
+				DFS(g, nbrIndex)
 				g.arcs[vertexIndex][nbrIndex].status = tree
 			case visited:
 				// 如果邻居节点是访问结束状态,根据发现时间标记弧为跨边或向前边
@@ -99,19 +163,33 @@ func Test_graph(t *testing.T) {
 			status:       0,
 		}
 	}
-	g.arcs[1][2] = &Arc{status: initail}
+	g.arcs[6][1] = &Arc{status: initail}
+	g.arcs[6][2] = &Arc{status: initail}
 	g.arcs[2][3] = &Arc{status: initail}
-	g.arcs[3][4] = &Arc{status: initail}
-	g.arcs[4][5] = &Arc{status: initail}
-	g.arcs[6][7] = &Arc{status: initail}
-	clock := 0
-	DFS(g, 0, clock)
+	g.arcs[2][6] = &Arc{status: initail}
+	g.arcs[6][3] = &Arc{status: initail}
+	g.arcs[6][4] = &Arc{status: initail}
+	g.arcs[6][5] = &Arc{status: initail}
+	//clockTime := 0
+	DFS(g, 6)
 	for k, v := range g.vertexs {
 		if v.status != visited {
-			DFS(g, k, clock)
+			DFS(g, k)
 		}
 	}
 	for !queue.empty() {
-		fmt.Printf("%v -> ", queue.Out())
+		vertex := queue.Out()
+		fmt.Printf("vertex: %v, discover: %v, visited: %v \n", vertex.data, vertex.discoverTime, vertex.finishedTime)
 	}
+	//i := 0
+	//AddInt(i)
+	//fmt.Println(i)
+}
+func AddInt(i int) {
+	if i < 10 {
+		i++
+		AddInt(i)
+		fmt.Println(i)
+	}
+	return
 }

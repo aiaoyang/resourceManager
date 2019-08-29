@@ -9,62 +9,62 @@ const (
 	vertexNum = 100
 )
 
-var (
-	stack = InitStack(100)
-	queue = InitQueue(200)
-)
-
-// Queue
-type Queue struct {
-	head  int
-	tail  int
-	size  int
-	store []*Vertex
-}
-
-func InitQueue(size int) *Queue {
-	q := &Queue{}
-	q.head = 0
-	q.tail = 0
-	q.size = size
-	q.store = make([]*Vertex, size)
-	return q
-}
-func (q *Queue) empty() bool {
-	if q.tail == q.head {
-		return true
-	}
-	return false
-}
-
-// 队列实际可用空间为q.size-1,因为使用了一个空间判断队列满
-func (q *Queue) full() bool {
-	if (q.tail+1)%q.size == q.head {
-		return true
-	}
-	return false
-}
-
-func (q *Queue) In(e *Vertex) {
-	if q.full() {
-		fmt.Println("queue is full")
-		return
-	}
-	q.store[q.tail] = e
-	q.tail = (q.tail + 1) % q.size
-	//fmt.Printf("in queue now queue's head is : %d, tail is %d \n", q.head, q.tail)
-}
-
-func (q *Queue) Out() *Vertex {
-	if q.empty() {
-		fmt.Println("queue is empty")
-		return nil
-	}
-	tmp := q.store[q.head]
-	q.head = (q.head + 1) % q.size
-	//fmt.Printf("out queue now queue's head is : %d, tail is %d \n", q.head, q.tail)
-	return tmp
-}
+//var (
+//	stack = InitStack(100)
+//	queue = InitQueue(200)
+//)
+//
+//// Queue
+//type Queue struct {
+//	head  int
+//	tail  int
+//	size  int
+//	store []*Vertex
+//}
+//
+//func InitQueue(size int) *Queue {
+//	q := &Queue{}
+//	q.head = 0
+//	q.tail = 0
+//	q.size = size
+//	q.store = make([]*Vertex, size)
+//	return q
+//}
+//func (q *Queue) empty() bool {
+//	if q.tail == q.head {
+//		return true
+//	}
+//	return false
+//}
+//
+//// 队列实际可用空间为q.size-1,因为使用了一个空间判断队列满
+//func (q *Queue) full() bool {
+//	if (q.tail+1)%q.size == q.head {
+//		return true
+//	}
+//	return false
+//}
+//
+//func (q *Queue) In(e *Vertex) {
+//	if q.full() {
+//		fmt.Println("queue is full")
+//		return
+//	}
+//	q.store[q.tail] = e
+//	q.tail = (q.tail + 1) % q.size
+//	//fmt.Printf("in queue now queue's head is : %d, tail is %d \n", q.head, q.tail)
+//}
+//
+//func (q *Queue) Out() *Vertex {
+//	if q.empty() {
+//		fmt.Println("queue is empty")
+//		return nil
+//	}
+//	tmp := q.store[q.head]
+//	q.head = (q.head + 1) % q.size
+//	//fmt.Printf("out queue now queue's head is : %d, tail is %d \n", q.head, q.tail)
+//	return tmp
+//}
 
 //func Test_Queue(t *testing.T) {
 //	q := InitQueue(3)
