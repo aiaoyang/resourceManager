@@ -92,12 +92,29 @@ type Vertex struct {
 	discoverTime int
 	finishedTime int
 	status       VexStatus
+	inDegree     int
+	outDegree    int
+	child        []*Vertex
+	parent       *Vertex
 }
 type Arc struct {
 	data   int
 	status ArcStatus
 }
 
+func reset(g *Graph) {
+	for _, v := range g.vertexs {
+		v.status = undiscovered
+		v.discoverTime = 0
+		v.finishedTime = 0
+		v.child = make([]*Vertex, 1, 10)
+		arcs := make([][]*Arc, len(g.vertexs))
+		for i := 0; i < len(g.vertexs); i++ {
+			arcs[i] = make([]*Arc, len(g.vertexs))
+		}
+		g.arcs = arcs
+	}
+}
 func InitGraph(nodeNum int) *Graph {
 	arcs := make([][]*Arc, nodeNum)
 	for i := 0; i < nodeNum; i++ {
@@ -120,6 +137,11 @@ func DFS(g *Graph, vertexIndex int) {
 	for nbrIndex, nbrStat := range g.arcs[vertexIndex] {
 		// 找到邻居节点
 		if nbrStat != nil {
+			g.vertexs[vertexIndex].child = append(g.vertexs[vertexIndex].child, g.vertexs[nbrIndex])
+			// 存在邻居节点则邻居节点入度+1
+			g.vertexs[nbrIndex].inDegree++
+			// 存在邻居节点则当前节点出度+1
+			g.vertexs[vertexIndex].outDegree++
 			//fmt.Printf("nbr index not null %d\n", nbrIndex)
 			// 判断邻居节点状态
 			switch g.vertexs[nbrIndex].status {
@@ -128,6 +150,8 @@ func DFS(g *Graph, vertexIndex int) {
 				g.arcs[vertexIndex][nbrIndex].status = backward
 				//fmt.Printf("discovered")
 			case undiscovered:
+				// 设置当前节点的孩子节点为邻居节点,邻居节点的父节点为当前节点
+				//g.vertexs[nbrIndex].parent = g.vertexs[vertexIndex]
 				// 如果邻居节点是未发现的状态，标记弧为tree
 				DFS(g, nbrIndex)
 				g.arcs[vertexIndex][nbrIndex].status = tree
@@ -154,8 +178,8 @@ func DFS(g *Graph, vertexIndex int) {
 }
 
 func Test_graph(t *testing.T) {
-	g := InitGraph(20)
-	for i := 0; i < 20; i++ {
+	g := InitGraph(10)
+	for i := 0; i < 10; i++ {
 		g.vertexs[i] = &Vertex{
 			data:         i,
 			discoverTime: 0,
@@ -163,13 +187,13 @@ func Test_graph(t *testing.T) {
 			status:       0,
 		}
 	}
-	g.arcs[6][1] = &Arc{status: initail}
+	g.arcs[0][1] = &Arc{status: initail}
 	g.arcs[6][2] = &Arc{status: initail}
+	g.arcs[6][0] = &Arc{status: initail}
 	g.arcs[2][3] = &Arc{status: initail}
 	g.arcs[2][6] = &Arc{status: initail}
-	g.arcs[6][3] = &Arc{status: initail}
-	g.arcs[6][4] = &Arc{status: initail}
-	g.arcs[6][5] = &Arc{status: initail}
+	g.arcs[1][3] = &Arc{status: initail}
+
 	//clockTime := 0
 	DFS(g, 6)
 	for k, v := range g.vertexs {
@@ -179,8 +203,26 @@ func Test_graph(t *testing.T) {
 	}
 	for !queue.empty() {
 		vertex := queue.Out()
-		fmt.Printf("vertex: %v, discover: %v, visited: %v \n", vertex.data, vertex.discoverTime, vertex.finishedTime)
+		//if vertex.parent == nil && vertex.child == nil {
+		//	continue
+		//}
+		for _, v := range vertex.child {
+			fmt.Printf("vertex :%v, child is : %v\n", vertex.data, v.data)
+		}
+		//fmt.Printf("vertex: %v, discover: %v, visited: %v \n", vertex.data, vertex.discoverTime, vertex.finishedTime)
 	}
+	//clock = 0
+	//reset(g)
+	//for k, v := range g.vertexs {
+	//	if v.status != visited {
+	//		DFS(g, k)
+	//	}
+	//}
+	//for !queue.empty() {
+	//	vertex := queue.Out()
+	//	fmt.Printf("vertex: %v, discover: %v, visited: %v \n", vertex.data, vertex.discoverTime, vertex.finishedTime)
+	//}
+
 	//i := 0
 	//AddInt(i)
 	//fmt.Println(i)
